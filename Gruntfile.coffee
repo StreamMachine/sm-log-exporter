@@ -8,9 +8,8 @@ module.exports = (grunt) ->
                     sourceMap: true
                 expand: true
                 flatten: false
-                cwd: "client"
-                src: ["**/*.coffee"]
-                dest: 'client'
+                src: ["src/*.coffee"]
+                dest: 'js/'
                 ext: ".js"
 
     grunt.loadNpmTasks 'grunt-contrib-coffee'
