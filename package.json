@@ -1,7 +1,7 @@
 {
-  "name": "sm-w3c-exporter",
+  "name": "sm-log-exporter",
   "version": "0.1.0",
-  "description": "Export StreamMachine sessions as W3C logs",
+  "description": "Export StreamMachine sessions as W3C or SoundExchange logs",
   "main": "index.js",
   "dependencies": {
     "elasticsearch": "^3.1.1",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/StreamMachine/sm-w3c-exporter.git"
+    "url": "https://github.com/StreamMachine/sm-log-exporter.git"
   },
   "keywords": [
     "streammachine"
@@ -29,7 +29,10 @@
   "author": "Eric Richardson <e@ewr.is>",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/StreamMachine/sm-w3c-exporter/issues"
+    "url": "https://github.com/StreamMachine/sm-log-exporter/issues"
   },
-  "homepage": "https://github.com/StreamMachine/sm-w3c-exporter"
+  "homepage": "https://github.com/StreamMachine/sm-log-exporter",
+  "bin": {
+    "sm-log-exporter": "./runner-cmd"
+  }
 }
