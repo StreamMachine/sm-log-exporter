@@ -4,27 +4,54 @@ tz      = require "timezone"
 
 SessionPuller = require "./session_puller"
 W3CFormatter = require "./w3c_formatter"
+SoundExFormatter = require "./soundexchange_formatter"
+
+FORMATTERS =
+    w3c:            W3CFormatter
+    soundexchange:  SoundExFormatter
+
 
 argv = require("yargs")
-    .demand(["server","start","end","index"])
-    .describe
-        server:         "Elasticsearch Server"
-        start:          "Start Date"
-        end:            "End Date"
-        zone:           "Timezone for dates"
-        min_duration:   "Minimum duration for session"
-        max_duration:   "Maximum duration for session"
-        index:          "Index Prefix"
-    .default
-        zone:           "UTC"
-        min_duration:   60
-        max_duration:   86400
+    .options
+        server:
+            describe:       "Elasticsearch Server"
+            demand:         true
+            requiresArg:    true
+        start:
+            describe:       "Start Date"
+            demand:         true
+            requiresArg:    true
+        end:
+            describe:       "End Date"
+            demand:         true
+            requiresArg:    true
+        zone:
+            describe:       "Timezone for dates"
+            default:        "UTC"
+        min_duration:
+            describe:       "Minimum seconds for session"
+            default:        null
+        max_duration:
+            describe:       "Maximum seconds for session"
+            default:        null
+        index:
+            describe:       "ES Index Prefix"
+            default:        "streammachine"
+        format:
+            describe:       "Output format (w3c or soundexchange)"
+            default:        "w3c"
     .argv
 
 if argv.zone != "UTC"
     zone = tz(require("timezone/#{argv.zone}"))
 else
     zone = tz
+
+formatter = FORMATTERS[ argv.format ]
+
+if !formatter
+    console.error "Invalid format. Options: #{ Object.keys(FORMATTERS).join(", ") }\n"
+    process.exit(1)
 
 es = new ES.Client host:argv.server
 
@@ -35,12 +62,12 @@ console.error "Stats: #{ start_date } - #{ end_date }"
 
 # -- Start pulling logs -- #
 
-puller      = new SessionPuller es, argv.index, start_date, end_date
-formatter   = new W3CFormatter
+puller  = new SessionPuller es, argv.index, start_date, end_date
+format  = new formatter argv.min_duration, argv.max_duration
 
-puller.stream.pipe(formatter).pipe(process.stdout)
+puller.stream.pipe(format).pipe(process.stdout)
 
-formatter.on "end", =>
+format.on "end", =>
     console.error "all done"
     process.exit()
 

@@ -115,7 +115,9 @@ module.exports = class SessionPuller
                 debug "Starting search on #{@idx}"
                 @es.search index:@idx, body:@body, type:"session", scroll:"10s", (err,results) =>
                     if err
-                        throw err
+                        # FIXME: The most likely case here is connection failure or IndexMissing
+                        @_finished()
+                        return false
 
                     @_total     = results.hits.total
                     @_remaining = results.hits.total - results.hits.hits.length

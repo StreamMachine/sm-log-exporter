@@ -157,7 +157,8 @@ module.exports = SessionPuller = (function() {
           return function(err, results) {
             var r, _i, _j, _len, _len1, _ref, _ref1;
             if (err) {
-              throw err;
+              _this._finished();
+              return false;
             }
             _this._total = results.hits.total;
             _this._remaining = results.hits.total - results.hits.hits.length;
