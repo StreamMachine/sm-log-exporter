@@ -1,6 +1,6 @@
 {
   "name": "sm-log-exporter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Export StreamMachine sessions as W3C or SoundExchange logs",
   "main": "index.js",
   "dependencies": {

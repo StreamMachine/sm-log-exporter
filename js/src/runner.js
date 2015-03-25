@@ -1,6 +1,6 @@
 var ES, FORMATTERS, SessionPuller, SoundExFormatter, W3CFormatter, argv, debug, end_date, es, format, formatter, puller, start_date, tz, zone;
 
-debug = require("debug")("sm-w3c-exporter");
+debug = require("debug")("sm-log-exporter");
 
 ES = require("elasticsearch");
 

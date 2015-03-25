@@ -1,4 +1,4 @@
-debug   = require("debug")("sm-w3c-exporter")
+debug   = require("debug")("sm-log-exporter")
 ES      = require "elasticsearch"
 tz      = require "timezone"
 

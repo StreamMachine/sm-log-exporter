@@ -2,7 +2,7 @@ var SessionPuller, debug, tz,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-debug = require("debug")("sm-w3c-exporter");
+debug = require("debug")("sm-log-exporter");
 
 tz = require('timezone');
 
@@ -115,6 +115,7 @@ module.exports = SessionPuller = (function() {
       }
       this._fetching = true;
       if (this._scrollId) {
+        debug("Running scroll", this._scrollId);
         return this.es.scroll({
           scroll: "10s",
           body: this._scrollId
@@ -122,6 +123,7 @@ module.exports = SessionPuller = (function() {
           return function(err, results) {
             var r, _i, _len, _ref;
             if (err) {
+              debug("Scroll failed: " + err);
               throw err;
             }
             if (results.hits.hits.length === 0) {
@@ -155,7 +157,7 @@ module.exports = SessionPuller = (function() {
           scroll: "10s"
         }, (function(_this) {
           return function(err, results) {
-            var r, _i, _j, _len, _len1, _ref, _ref1;
+            var r, _i, _len, _ref;
             if (err) {
               _this._finished();
               return false;
@@ -163,18 +165,13 @@ module.exports = SessionPuller = (function() {
             _this._total = results.hits.total;
             _this._remaining = results.hits.total - results.hits.hits.length;
             _this._scrollId = results._scroll_id;
-            debug("First read. Total is " + _this._total + ".");
+            debug("First read. Total is " + _this._total + ".", _this._scrollId);
             _ref = results.hits.hits;
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               r = _ref[_i];
               if (!_this.push(r._source)) {
                 _this._keepFetching = false;
               }
-            }
-            _ref1 = results.hits.hits;
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              r = _ref1[_j];
-              _this.push(r._source);
             }
             if (_this._remaining <= 0) {
               return _this._finished();

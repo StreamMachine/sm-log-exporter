@@ -1,4 +1,4 @@
-debug   = require("debug")("sm-w3c-exporter")
+debug   = require("debug")("sm-log-exporter")
 tz      = require('timezone')
 
 module.exports = class SessionPuller
@@ -92,8 +92,10 @@ module.exports = class SessionPuller
             @_fetching = true
 
             if @_scrollId
+                debug "Running scroll", @_scrollId
                 @es.scroll scroll:"10s", body:@_scrollId, (err,results) =>
                     if err
+                        debug "Scroll failed: #{err}"
                         throw err
 
                     if results.hits.hits.length == 0
@@ -123,12 +125,10 @@ module.exports = class SessionPuller
                     @_remaining = results.hits.total - results.hits.hits.length
                     @_scrollId  = results._scroll_id
 
-                    debug "First read. Total is #{ @_total }."
+                    debug "First read. Total is #{ @_total }.", @_scrollId
 
                     for r in results.hits.hits
                         @_keepFetching = false if !@push r._source
-
-                    @push r._source for r in results.hits.hits
 
                     if @_remaining <= 0
                         @_finished()
