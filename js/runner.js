@@ -1,4 +1,4 @@
-var ES, FORMATTERS, SessionPuller, SoundExFormatter, W3CFormatter, argv, debug, end_date, es, format, formatter, puller, start_date, tz, zone;
+var ES, FORMATTERS, SessionPuller, SoundExFormatter, UserAgentFormatter, W3CFormatter, argv, debug, end_date, es, format, formatter, puller, start_date, tz, zone;
 
 debug = require("debug")("sm-log-exporter");
 
@@ -12,9 +12,12 @@ W3CFormatter = require("./w3c_formatter");
 
 SoundExFormatter = require("./soundexchange_formatter");
 
+UserAgentFormatter = require("./useragent_formatter");
+
 FORMATTERS = {
   w3c: W3CFormatter,
-  soundexchange: SoundExFormatter
+  soundexchange: SoundExFormatter,
+  ua: UserAgentFormatter
 };
 
 argv = require("yargs").options({

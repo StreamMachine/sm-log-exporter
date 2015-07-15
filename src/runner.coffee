@@ -5,10 +5,12 @@ tz      = require "timezone"
 SessionPuller = require "./session_puller"
 W3CFormatter = require "./w3c_formatter"
 SoundExFormatter = require "./soundexchange_formatter"
+UserAgentFormatter = require "./useragent_formatter"
 
 FORMATTERS =
     w3c:            W3CFormatter
     soundexchange:  SoundExFormatter
+    ua:             UserAgentFormatter
 
 
 argv = require("yargs")

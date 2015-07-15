@@ -7,7 +7,7 @@ module.exports = (grunt) ->
                     bare: true
                     sourceMap: true
                 expand: true
-                flatten: false
+                flatten: true
                 src: ["src/*.coffee"]
                 dest: 'js/'
                 ext: ".js"

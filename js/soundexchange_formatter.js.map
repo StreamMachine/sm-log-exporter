@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "soundexchange_formatter.js",
-  "sourceRoot": "../../src/",
+  "sourceRoot": "../src/",
   "sources": [
     "soundexchange_formatter.coffee"
   ],

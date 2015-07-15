@@ -1,1 +1,1 @@
-require("./js/src/runner")
+require("./js/runner")
