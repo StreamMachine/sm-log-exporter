@@ -5,24 +5,26 @@ module.exports = class SessionPuller
     constructor: (@es,@index_prefix,@start,@end) ->
 
         # -- Build our query body -- #
-
         @_body =
             query:
-                filtered:
-                    query:
-                        match_all:{}
-                    filter:
-                        and: [
-                            range:
-                                duration:
-                                    gte:60
-                        ,
-                            range:
-                                time:
-                                    gte:@start
-                                    lt:@end
-                        ]
-            sort: [ time:"asc" ]
+                bool:
+                    must: [
+                        {
+                            match:
+                                "type": "session"
+                        }
+                    ]
+                    filter: [
+                      range:
+                        duration:
+                            gte: 60,
+                      range:
+                        time:
+                            gte: @start
+                            lt: @end
+
+                    ]
+            sort: [ time: 'asc']
             size: 1000
             from: 0
 
@@ -115,12 +117,13 @@ module.exports = class SessionPuller
 
             else
                 debug "Starting search on #{@idx}"
-                @es.search index:@idx, body:@body, type:"session", scroll:"10s", (err,results) =>
+                @es.search index:@idx, body:@body, scroll:"10s", (err,results) =>
                     if err
-                        # FIXME: The most likely case here is connection failure or IndexMissing
-                        @_finished()
-                        return false
-
+                        if err.body.status == 404
+                            @_finished()
+                            return false
+                        else
+                            console.error err
                     @_total     = results.hits.total
                     @_remaining = results.hits.total - results.hits.hits.length
                     @_scrollId  = results._scroll_id

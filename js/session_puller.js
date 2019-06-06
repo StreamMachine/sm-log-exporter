@@ -14,33 +14,34 @@ module.exports = SessionPuller = (function() {
     this.end = end;
     this._body = {
       query: {
-        filtered: {
-          query: {
-            match_all: {}
-          },
-          filter: {
-            and: [
-              {
-                range: {
-                  duration: {
-                    gte: 60
-                  }
+        bool: {
+          must: [
+            {
+              match: {
+                "type": "session"
+              }
+            }
+          ],
+          filter: [
+            {
+              range: {
+                duration: {
+                  gte: 60
                 }
-              }, {
-                range: {
-                  time: {
-                    gte: this.start,
-                    lt: this.end
-                  }
+              },
+              range: {
+                time: {
+                  gte: this.start,
+                  lt: this.end
                 }
               }
-            ]
-          }
+            }
+          ]
         }
       },
       sort: [
         {
-          time: "asc"
+          time: 'asc'
         }
       ],
       size: 1000,
@@ -153,14 +154,17 @@ module.exports = SessionPuller = (function() {
         return this.es.search({
           index: this.idx,
           body: this.body,
-          type: "session",
           scroll: "10s"
         }, (function(_this) {
           return function(err, results) {
             var r, _i, _len, _ref;
             if (err) {
-              _this._finished();
-              return false;
+              if (err.body.status === 404) {
+                _this._finished();
+                return false;
+              } else {
+                console.error(err);
+              }
             }
             _this._total = results.hits.total;
             _this._remaining = results.hits.total - results.hits.hits.length;

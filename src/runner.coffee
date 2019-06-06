@@ -1,5 +1,5 @@
 debug   = require("debug")("sm-log-exporter")
-ES      = require "elasticsearch"
+elasticsearch      = require "@elastic/elasticsearch"
 tz      = require "timezone"
 
 SessionPuller = require "./session_puller"
@@ -55,7 +55,9 @@ if !formatter
     console.error "Invalid format. Options: #{ Object.keys(FORMATTERS).join(", ") }\n"
     process.exit(1)
 
-es = new ES.Client host:argv.server
+es = new elasticsearch.Client
+    node: argv.server
+    apiVersion: '1.7'
 
 start_date  = zone(argv.start,argv.zone)
 end_date    = zone(argv.end,argv.zone)
