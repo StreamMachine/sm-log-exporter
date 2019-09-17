@@ -27,4 +27,3 @@ exec(cmd, (err, stdout, stderr) => {
     console.log(`exec error: ${err}`);
   }
 });
-
