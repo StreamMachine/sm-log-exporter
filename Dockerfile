@@ -1,13 +1,10 @@
 FROM node:8.16.0-alpine
 
-ENV reports_dir /reports
 ENV work_dir /sm-log-exporter
 
 WORKDIR $work_dir
 
-RUN mkdir $reports_dir && \
-    chown node:node $reports_dir && \
-    chown node:node $work_dir
+RUN chown -R node:node $work_dir
 
 USER node
 

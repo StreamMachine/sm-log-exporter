@@ -15,7 +15,7 @@ cmd = `
 --index ${process.env.ELASTICSEARCH_INDEX} \
 --start ${y} \
 --end ${d} \
-> /reports/${filename}
+> ${process.env.REPORTS_DIR}/${filename}
 `;
 
 console.log(`Preparing to write log file: ${filename}`);
