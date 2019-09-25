@@ -1,33 +1,31 @@
 debug   = require("debug")("sm-log-exporter")
 tz      = require('timezone')
+moment  = require('moment')
 
 module.exports = class SessionPuller
     constructor: (@es,@index_prefix,@start,@end) ->
+        start = moment(@start).format('YYYY-MM-DDTHH:mm:ss.000Z');
+        end = moment(@end).format('YYYY-MM-DDTHH:mm:ss.000Z');
 
         # -- Build our query body -- #
-
         @_body =
             query:
-                filtered:
-                    query:
-                        match_all:{}
-                    filter:
-                        and: [
-                            range:
-                                duration:
-                                    gte:60
-                        ,
-                            range:
-                                time:
-                                    gte:@start
-                                    lt:@end
-                        ]
-            sort: [ time:"asc" ]
+                bool:
+                    filter: [
+                      range:
+                        duration:
+                            gte: 60,
+                      range:
+                        time:
+                            gte: start
+                            lt: end
+
+                    ]
+            sort: [ time: 'asc']
             size: 1000
             from: 0
 
         # -- get all indices we'll be doing -- #
-
         @_idx = @_indices @index_prefix, @start, @end
         @_currentIndex = null
 
@@ -92,8 +90,8 @@ module.exports = class SessionPuller
             @_fetching = true
 
             if @_scrollId
-                debug "Running scroll", @_scrollId
-                @es.scroll scroll:"10s", body:@_scrollId, (err,results) =>
+                @es.scroll scroll:"10s", body:@_scrollId, (err,resp) =>
+                    results = resp.body
                     if err
                         debug "Scroll failed: #{err}"
                         throw err
@@ -114,15 +112,16 @@ module.exports = class SessionPuller
                         @_fetch() if @_keepFetching
 
             else
-                debug "Starting search on #{@idx}"
-                @es.search index:@idx, body:@body, type:"session", scroll:"10s", (err,results) =>
+                @es.search index:@idx, body:@body, scroll:"10s", (err,resp) =>
                     if err
-                        # FIXME: The most likely case here is connection failure or IndexMissing
-                        @_finished()
-                        return false
-
-                    @_total     = results.hits.total
-                    @_remaining = results.hits.total - results.hits.hits.length
+                        if err.body.status == 404
+                            @_finished()
+                            return false
+                        else
+                            console.error err.body.error.root_cause
+                    results = resp.body
+                    @_total     = results.hits.total.value
+                    @_remaining = results.hits.total.value - results.hits.hits.length
                     @_scrollId  = results._scroll_id
 
                     debug "First read. Total is #{ @_total }.", @_scrollId

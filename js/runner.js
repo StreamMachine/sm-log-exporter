@@ -1,8 +1,8 @@
-var ES, FORMATTERS, SessionPuller, SoundExFormatter, UserAgentFormatter, W3CFormatter, argv, debug, end_date, es, format, formatter, puller, start_date, tz, zone;
+var FORMATTERS, SessionPuller, SoundExFormatter, UserAgentFormatter, W3CFormatter, argv, debug, elasticsearch, end_date, es, format, formatter, puller, start_date, tz, zone;
 
 debug = require("debug")("sm-log-exporter");
 
-ES = require("elasticsearch");
+elasticsearch = require("@elastic/elasticsearch");
 
 tz = require("timezone");
 
@@ -71,8 +71,9 @@ if (!formatter) {
   process.exit(1);
 }
 
-es = new ES.Client({
-  host: argv.server
+es = new elasticsearch.Client({
+  node: argv.server,
+  apiVersion: '1.7'
 });
 
 start_date = zone(argv.start, argv.zone);

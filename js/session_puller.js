@@ -1,4 +1,4 @@
-var SessionPuller, debug, tz,
+var SessionPuller, debug, moment, tz,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6,41 +6,39 @@ debug = require("debug")("sm-log-exporter");
 
 tz = require('timezone');
 
+moment = require('moment');
+
 module.exports = SessionPuller = (function() {
   function SessionPuller(es, index_prefix, start, end) {
     this.es = es;
     this.index_prefix = index_prefix;
     this.start = start;
     this.end = end;
+    start = moment(this.start).format('YYYY-MM-DDTHH:mm:ss.000Z');
+    end = moment(this.end).format('YYYY-MM-DDTHH:mm:ss.000Z');
     this._body = {
       query: {
-        filtered: {
-          query: {
-            match_all: {}
-          },
-          filter: {
-            and: [
-              {
-                range: {
-                  duration: {
-                    gte: 60
-                  }
+        bool: {
+          filter: [
+            {
+              range: {
+                duration: {
+                  gte: 60
                 }
-              }, {
-                range: {
-                  time: {
-                    gte: this.start,
-                    lt: this.end
-                  }
+              },
+              range: {
+                time: {
+                  gte: start,
+                  lt: end
                 }
               }
-            ]
-          }
+            }
+          ]
         }
       },
       sort: [
         {
-          time: "asc"
+          time: 'asc'
         }
       ],
       size: 1000,
@@ -115,13 +113,13 @@ module.exports = SessionPuller = (function() {
       }
       this._fetching = true;
       if (this._scrollId) {
-        debug("Running scroll", this._scrollId);
         return this.es.scroll({
           scroll: "10s",
           body: this._scrollId
         }, (function(_this) {
-          return function(err, results) {
-            var r, _i, _len, _ref;
+          return function(err, resp) {
+            var r, results, _i, _len, _ref;
+            results = resp.body;
             if (err) {
               debug("Scroll failed: " + err);
               throw err;
@@ -149,21 +147,24 @@ module.exports = SessionPuller = (function() {
           };
         })(this));
       } else {
-        debug("Starting search on " + this.idx);
         return this.es.search({
           index: this.idx,
           body: this.body,
-          type: "session",
           scroll: "10s"
         }, (function(_this) {
-          return function(err, results) {
-            var r, _i, _len, _ref;
+          return function(err, resp) {
+            var r, results, _i, _len, _ref;
             if (err) {
-              _this._finished();
-              return false;
+              if (err.body.status === 404) {
+                _this._finished();
+                return false;
+              } else {
+                console.error(err.body.error.root_cause);
+              }
             }
-            _this._total = results.hits.total;
-            _this._remaining = results.hits.total - results.hits.hits.length;
+            results = resp.body;
+            _this._total = results.hits.total.value;
+            _this._remaining = results.hits.total.value - results.hits.hits.length;
             _this._scrollId = results._scroll_id;
             debug("First read. Total is " + _this._total + ".", _this._scrollId);
             _ref = results.hits.hits;
