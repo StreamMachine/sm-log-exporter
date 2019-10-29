@@ -90,7 +90,7 @@ module.exports = class SessionPuller
             @_fetching = true
 
             if @_scrollId
-                @es.scroll scroll:"10s", body:@_scrollId, (err,resp) =>
+                @es.scroll scroll:"10s", scroll_id:@_scrollId, (err,resp) =>
                     results = resp.body
                     if err
                         debug "Scroll failed: #{err}"

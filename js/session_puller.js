@@ -115,7 +115,7 @@ module.exports = SessionPuller = (function() {
       if (this._scrollId) {
         return this.es.scroll({
           scroll: "10s",
-          body: this._scrollId
+          scroll_id: this._scrollId
         }, (function(_this) {
           return function(err, resp) {
             var r, results, _i, _len, _ref;
