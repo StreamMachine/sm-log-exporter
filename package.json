@@ -4,7 +4,7 @@
   "description": "Export StreamMachine sessions as W3C or SoundExchange logs",
   "main": "index.js",
   "dependencies": {
-    "@elastic/elasticsearch": "^6.7.0-rc.1",
+    "@elastic/elasticsearch": "^7.4.0",
     "debug": "~2.1.0",
     "moment": "^2.24.0",
     "object-hash": "~0.5.0",
